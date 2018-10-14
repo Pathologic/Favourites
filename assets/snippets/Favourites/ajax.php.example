@@ -1,0 +1,23 @@
+<?php
+define('MODX_API_MODE', true);
+include_once(__DIR__ . '/../../../index.php');
+$modx->db->connect();
+if (empty ($modx->config)) {
+    $modx->getSettings();
+}
+$modx->invokeEvent("OnWebPageInit");
+if(!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || (strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest')){
+    $modx->sendErrorPage();
+}
+include_once ('actions.php');
+include_once('model.php');
+$id = isset($_POST['id']) && is_numeric($_POST['id']) ? (int)$_POST['id'] : 0;
+$action = !empty($_POST['action']) && is_scalar($_POST['action']) ? $_POST['action'] : 'count';
+$controller = 'Pathologic\\Favourites\\Actions';
+$controller = new $controller($modx, ['model' => 'Pathologic\\Favourites\\Model', 'id' => $id]);
+if (!empty($action) && method_exists($controller, $action)) {
+    $out = call_user_func(array($controller, $action));
+    echo($out);
+    die();
+}
+
